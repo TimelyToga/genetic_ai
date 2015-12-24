@@ -12,13 +12,13 @@ import game.World;
 public class Food extends Renderable {
 
 	private int energyValue = 300;
-	private float size = (energyValue / 100) + 1;
 	private boolean isAvailable = true;
 	Color color = new Color(255, 0,0);
 	
 	public Food(int x, int y){
 		this.xCood = x;
 		this.yCood = y;
+		this.size = (energyValue / 100) + 1;
 	}
 	
 	/**
@@ -27,6 +27,7 @@ public class Food extends Renderable {
 	public Food() {
 		this.xCood = G.world.xSize / 2;
 		this.yCood = G.world.ySize / 2;
+		this.size = (energyValue / 100) + 1;
 	}
 	
 	public int consume(){
@@ -52,6 +53,10 @@ public class Food extends Renderable {
 		g.setColor(this.color);
 		Circle c = new Circle(this.xCood, this.yCood, size);
 		g.fill(c);
+	}
+	
+	public boolean intersectWithScrum(Scrum s) {
+		
 	}
 	
 }
