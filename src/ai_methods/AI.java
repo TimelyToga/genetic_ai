@@ -1,6 +1,5 @@
 package ai_methods;
 
-import units.Action;
 import units.Scrum;
 
 public interface AI {
