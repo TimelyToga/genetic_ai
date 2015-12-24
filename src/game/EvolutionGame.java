@@ -61,6 +61,10 @@ public class EvolutionGame extends BasicGame{
             System.exit(0);
         }
         
+        if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+        	G.pauseNextIT = true;
+        }
+        
         G.world.update(delta);
 	}
     

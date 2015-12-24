@@ -23,7 +23,7 @@ public class World {
     public Set<Renderable> renderables;
     public Set<Food> foods;
     
-    private int initialNumScrums = 1;
+    private int initialNumScrums = 3;
     private int maxNumScrums = 100;
 	
 	public World(int xSize, int ySize){

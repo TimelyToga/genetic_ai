@@ -15,9 +15,6 @@ import static util.Logging.*;
 
 public class Scrum extends Renderable {
 
-	public int xCood;
-	public int yCood;
-
 	public Vector2d velocity;
 
 	public int size;
@@ -27,9 +24,10 @@ public class Scrum extends Renderable {
 	public Color color;
 
 	public int numSensors;
-	public double sensorAngleSpread = 15.0;
+	private double angleStep;
+	public double sensorAngleSpread = 45.0;
 	public double sensorRange = 200.0;
-	public double sensorMappingSlope = -1.0 / 20.0;
+	public double sensorMappingSlope = -1.0 / 40.0;
 	public double sensorB = (sensorRange * sensorMappingSlope * -1.0) + 1.0;
 	public double[] sensorOutput;
 
@@ -43,6 +41,7 @@ public class Scrum extends Renderable {
 		this.energy = energy;
 		this.energyUseRate = energyUseRate;
 		this.numSensors = numSensors;
+		this.angleStep = 360 / numSensors;
 		this.sensorOutput = new double[numSensors];
 		for (int a = 0; a < numSensors; a++) {
 			sensorOutput[a] = sensorRange;
@@ -59,7 +58,7 @@ public class Scrum extends Renderable {
 		int size = G.rgen.nextInt(20) + 5;
 		int energy = G.rgen.nextInt(1000) + 200;
 		int energyUseRate = G.rgen.nextInt(100);
-		int numSensors = G.rgen.nextInt(4) + 4;
+		int numSensors = G.rgen.nextInt(4) + 20;
 
 		return new Scrum(x, y, velocity, size, energy, energyUseRate,
 				numSensors);
@@ -89,7 +88,7 @@ public class Scrum extends Renderable {
 						this.sensorRange)) {
 					this.sensorOutput[a] = distanceToFood(curFood);
 				} else {
-					this.sensorOutput[a] = -1.0;
+					this.sensorOutput[a] = sensorRange;
 				}
 			}
 			curAngle += angleStep;
@@ -102,13 +101,13 @@ public class Scrum extends Renderable {
 		this.yCood += velocity.getY();
 
 		// Do velocity correction
-		if (xCood <= 0)
+		if (xCood <= 0 && velocity.getX() < 0)
 			velocity.setX(velocity.getX() * -1.0);
-		if (yCood <= 0)
+		if (yCood <= 0 && velocity.getY() < 0)
 			velocity.setY(velocity.getY() * -1.0);
-		if (xCood >= G.world.xSize)
+		if (xCood >= G.world.xSize && velocity.getX() > 0)
 			velocity.setX(velocity.getX() * -1.0);
-		if (yCood >= G.world.ySize)
+		if (yCood >= G.world.ySize && velocity.getY() > 0)
 			velocity.setY(velocity.getY() * -1.0);
 
 		think();
@@ -116,13 +115,11 @@ public class Scrum extends Renderable {
 
 	@Override
 	public void render(Graphics g, int xOffset, int yOffset) {
-//		Logging.log(xCood + ", " + yCood);
-
 		g.setColor(this.color);
 		Circle c = new Circle(xCood, yCood, size);
 		g.fill(c);
 
-		// Render sensors
+		// Initialize rotating vector to use to find positions of sensors
 		Vector2d rotV = new Vector2d(size + 5, 0);
 		if (G.oneTime) {
 			log(rotV.getX() + ", " + rotV.getY());
@@ -131,9 +128,8 @@ public class Scrum extends Renderable {
 			for(double d : this.sensorOutput){
 				logWord(d + ", ");
 			}
-			logWord(" ]\n");
+			logWord(" ]\n"); 
 		}
-		double angleStep = 360 / numSensors;
 		
 		for (int a = 0; a < numSensors; a++) {
 			// Making sure sensor has output
@@ -142,12 +138,13 @@ public class Scrum extends Renderable {
 			int newX = (int) (xCood + rotV.getX());
 			int newY = (int) (yCood + rotV.getY());
 			double size = (sensorMappingSlope * (sensorOutput[a] + 1)) + sensorB;
-			if(sensorOutput[a] < 50 && sensorOutput[a] > 0)
-				Logging.log(String.valueOf(size));
+			
 			Circle c1 = new Circle(newX, newY, (int) size);
 			g.fill(c1);
-//			g.drawString(String.valueOf(sensorOutput[a]), newX, newY);
+			
 			rotV.setAngle(rotV.getAngle() + angleStep);
+			
+			// Debugging Logging
 			if(G.oneTime){
 				if(a == numSensors - 1){
 					G.oneTime = false;
