@@ -4,12 +4,14 @@ import java.util.Random;
 
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.BasicGame;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.geom.Circle;
 
+import util.Logging;
 import util.Vector2d;
 
 public class EvolutionGame extends BasicGame{
@@ -21,38 +23,16 @@ public class EvolutionGame extends BasicGame{
 	private static int screenX = 640;
 	private static int screenY = 480;
 
-	World world;
     public static void main(String[] args) {
-//        try {
-//            AppGameContainer app = new AppGameContainer(new EvolutionGame());
-//            app.setDisplayMode(screenX, screenY, false);
-//
-//            System.out.println("Screen width, height: " + screenX + ", " + screenY);
-//            app.start();
-//        } catch (SlickException e) {
-//            e.printStackTrace();
-//        }
-    	
-    	double size = 10; 
-    	double numSensors = 4;
-    	int xCood = 0;
-    	int yCood = 0;
-		Vector2d rotV = new Vector2d(size + 5, 0);
-		double angleStep = 360 / numSensors;
-		for (int a = 0; a < numSensors; a++) {
-			int newX = (int) (xCood + rotV.getX());
-			int newY = (int) (xCood + rotV.getY());
-			
-			int size2 = 3;
-			Circle c1 = new Circle(newX, newY, size2);
-			rotV.setAngle(rotV.getAngle() + angleStep);
-			System.out.println(rotV.getAngle());
-			System.out.println("(" + newX + ", " + newY + ")"); 
-		}
-		
-//		for(int a = 0; a < 4; a++){
-//			System.out.println(Math.sin(Math.toRadians(a*90)));
-//		}
+        try {
+            AppGameContainer app = new AppGameContainer(new EvolutionGame());
+            app.setDisplayMode(screenX, screenY, false);
+            
+            Logging.log("Screen width, height: " + screenX + ", " + screenY, Logging.VERBOSE);
+            app.start();
+        } catch (SlickException e) {
+            e.printStackTrace();
+        }	
     }
 
     @Override
@@ -67,6 +47,7 @@ public class EvolutionGame extends BasicGame{
 	public void init(GameContainer container) throws SlickException {
 		container.setTargetFrameRate(60);
 		container.setVSync(true);
+		container.getGraphics().setBackground(new Color(255, 255, 255));
 		
 		G.rgen = new Random();
 		G.world = new World(screenX, screenY);

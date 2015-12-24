@@ -1,18 +1,17 @@
 package units;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import game.G;
 import game.Renderable;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.ShapeFill;
 import org.newdawn.slick.geom.Circle;
 
+import util.Logging;
 import util.Vector2d;
 import util.VectorUtil;
+
+import static util.Logging.*;
 
 public class Scrum extends Renderable {
 
@@ -30,6 +29,7 @@ public class Scrum extends Renderable {
 	public int numSensors;
 	public double sensorAngleSpread = 15;
 	public double sensorRange = 400;
+	public double sensorVisualizationMappingSlope = 1/10;
 	public double[] sensorOutput;
 
 	public Scrum(int x, int y, Vector2d velocity, int size, int energy,
@@ -85,16 +85,12 @@ public class Scrum extends Renderable {
 						sensorAngleSpread, curFood.toVector2d(),
 						this.sensorRange)) {
 					this.sensorOutput[a] = distanceToFood(curFood);
+				} else {
+					this.sensorOutput[a] = 0;
 				}
 			}
 			curAngle += angleStep;
 		}
-
-		// System.out.print("[ ");
-		// for(double d : this.sensorOutput){
-		// System.out.print(d + ", ");
-		// }
-		// System.out.print(" ]\n");
 	}
 
 	@Override
@@ -103,20 +99,20 @@ public class Scrum extends Renderable {
 		this.yCood += velocity.getY();
 
 		if (xCood <= 0)
-			velocity.setX(velocity.getX() * -1);
+			velocity.setX(velocity.getX() * -1.0);
 		if (yCood <= 0)
-			velocity.setY(velocity.getY() * -1);
+			velocity.setY(velocity.getY() * -1.0);
 		if (xCood >= G.world.xSize)
-			velocity.setX(velocity.getX() * -1);
+			velocity.setX(velocity.getX() * -1.0);
 		if (yCood >= G.world.ySize)
-			velocity.setY(velocity.getY() * -1);
+			velocity.setY(velocity.getY() * -1.0);
 
 		think();
 	}
 
 	@Override
 	public void render(Graphics g, int xOffset, int yOffset) {
-//		System.out.println(xCood + ", " + yCood);
+//		Logging.log(xCood + ", " + yCood);
 
 		g.setColor(this.color);
 		Circle c = new Circle(xCood, yCood, size);
@@ -125,27 +121,29 @@ public class Scrum extends Renderable {
 		// Render sensors
 		Vector2d rotV = new Vector2d(size + 5, 0);
 		if (G.oneTime) {
-			System.out.println(rotV.getX() + ", " + rotV.getY());
+			log(rotV.getX() + ", " + rotV.getY());
 			
-			System.out.print("[ ");
+			logWord("[ ");
 			for(double d : this.sensorOutput){
-				System.out.print(d + ", ");
+				logWord(d + ", ");
 			}
-			System.out.print(" ]\n");
+			logWord(" ]\n");
 		}
 		double angleStep = 360 / numSensors;
+		
 		for (int a = 0; a < numSensors; a++) {
 			int newX = (int) (xCood + rotV.getX());
-			int newY = (int) (xCood + rotV.getY());
-			int size = 3;
+			int newY = (int) (yCood + rotV.getY());
+			int size = (int) ((sensorVisualizationMappingSlope * sensorOutput[a]) + 2);
 			Circle c1 = new Circle(newX, newY, size);
 			g.fill(c1);
+//			g.drawString(String.valueOf(sensorOutput[a]), newX, newY);
 			rotV.setAngle(rotV.getAngle() + angleStep);
 			if(G.oneTime){
 				if(a == numSensors - 1){
 					G.oneTime = false;
 				}
-				System.out.println("(" + newX + ", " + newY + ")"); 
+				Logging.log("(" + newX + ", " + newY + ")", Logging.DEBUG); 
 			}
 		}
 	}
