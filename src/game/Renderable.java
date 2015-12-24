@@ -12,9 +12,14 @@ public abstract class Renderable {
 
     public int xCood = 0;
     public int yCood = 0;
+    public int size = 0;
 
     public abstract void update(int xDelta, int yDelta, int timeDelta);
 
     public abstract void render(Graphics g, int xOffset, int yOffset);
+    
+    public double distanceBetween(Renderable r) {
+    	return Math.sqrt(Math.pow(this.xCood - r.xCood, 2) + Math.pow(this.yCood - r.yCood, 2));
+    }
 
 }
