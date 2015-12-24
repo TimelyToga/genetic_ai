@@ -39,7 +39,7 @@ public class World {
 			addRandScrum();
 		}
 		
-		addRandFood();
+		addCenterFood();
 	}
 	
 	public void render(Graphics g, int xOffset, int yOffset){
@@ -68,6 +68,12 @@ public class World {
 		int x = G.rgen.nextInt(this.xSize);
 		int y = G.rgen.nextInt(this.ySize);
 		Food f = new Food(x, y);
+		this.renderables.add(f);
+		this.foods.add(f);
+	}
+	
+	public void addCenterFood() {
+		Food f = new Food(this.xSize / 2, this.ySize / 2);
 		this.renderables.add(f);
 		this.foods.add(f);
 	}

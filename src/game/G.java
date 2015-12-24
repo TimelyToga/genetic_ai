@@ -9,4 +9,6 @@ public class G {
 	public static World world;
 	
 	public static boolean oneTime = true;
+	public final static boolean verbose = false;
+	public final static int CUR_LOG_LEVEL = 0;
 }

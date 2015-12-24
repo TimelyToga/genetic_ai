@@ -7,6 +7,7 @@ import org.newdawn.slick.geom.Circle;
 import util.Vector2d;
 import game.G;
 import game.Renderable;
+import game.World;
 
 public class Food extends Renderable {
 
@@ -18,6 +19,14 @@ public class Food extends Renderable {
 	public Food(int x, int y){
 		this.xCood = x;
 		this.yCood = y;
+	}
+	
+	/**
+	 * Creates food in center of world
+	 */
+	public Food() {
+		this.xCood = G.world.xSize / 2;
+		this.yCood = G.world.ySize / 2;
 	}
 	
 	public int consume(){
