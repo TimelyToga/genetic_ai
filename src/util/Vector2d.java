@@ -23,20 +23,6 @@ public class Vector2d {
 		this.y = original.y;
 	}
 	
-
-//	public double getAngle(){
-////		return Math.toDegrees(Math.atan2(x, y));
-//		double factor;
-//		if(y/x > 0){
-//			factor = 1;
-//		} else {
-//			factor = -1;
-//		}
-//		double tempx = ((x > 0) ? x : (2*Math.PI + x) * 360 / (2*Math.PI));
-//		tempx = Math.toRadians(tempx);
-//		return Math.toDegrees(Math.atan2(tempx, y));
-//	}
-	
 	/**
 	 * 
 	 * @return Angle of vector in degrees
@@ -111,5 +97,67 @@ public class Vector2d {
 	
 	public double getY(){
 		return this.y;
+	}
+	
+	public void reflectX() {
+		System.out.println("reflectX");
+		System.out.println("Pre angle and mag: " + this.getAngle() + ", " + this.getMagnitude());
+		System.out.println("x, y: " + this.getX() + ", " + this.getY());
+		
+		double twoTheta;
+		if(inFirstOrThirdQuadrant()) {
+			// CW -2theta
+			twoTheta = getCWAngleToAxis()*2.0;
+			this.setAngle(this.getAngle() + -1.0*twoTheta);
+		} else {
+			// CCW +2theta
+			twoTheta = getCCWAngleToAxis()*2.0;
+			this.setAngle(this.getAngle() + twoTheta);
+		}
+		
+		System.out.println("theta: " + twoTheta / 2.0);
+		System.out.println("Post angle and mag: " + this.getAngle() + ", " + this.getMagnitude() + "\n");
+	}
+	
+	public void reflectY() {
+		System.out.println("reflectX");
+		System.out.println("Pre angle and mag: " + this.getAngle() + ", " + this.getMagnitude());
+		System.out.println("x, y: " + this.getX() + ", " + this.getY());
+		
+		double twoTheta;
+		if(!inFirstOrThirdQuadrant()) {
+			// CW -2theta
+			twoTheta = getCWAngleToAxis()*2.0;
+			this.setAngle(this.getAngle() + -1.0*twoTheta);
+		} else {
+			// CCW +2theta
+			twoTheta = getCCWAngleToAxis()*2.0;
+			this.setAngle(this.getAngle() + twoTheta);
+		}
+		
+		System.out.println("theta: " + twoTheta / 2.0);
+		System.out.println("Post angle and mag: " + this.getAngle() + ", " + this.getMagnitude() + "\n");
+	}
+	
+	public boolean inFirstOrThirdQuadrant() {
+		return (this.getX() * this.getY() > 0);
+	}
+	
+	public double getCWAngleToAxis() {
+		double angle = this.getAngle();
+		while(angle >= 90) {
+			angle -= 90;
+		}
+		
+		return angle;
+	}
+	
+	public double getCCWAngleToAxis() {
+		double angle = this.getAngle();
+		while(angle >= 90) {
+			angle -= 90;
+		}
+		
+		return 90 - angle;
 	}
 }

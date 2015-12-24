@@ -1,5 +1,7 @@
 package testing;
 
+import util.Vector2d;
+
 public class Tests {
 	
 	public void testLinearMapping() {
@@ -16,6 +18,19 @@ public class Tests {
     		curValue = (int) (slope * curDist + b);
     		System.out.println("curValue: " + curValue + "; curDist: " + curDist);
     	}
+	}
+	
+	public boolean testGetCWAngleToAxis() {
+    	Vector2d v = new Vector2d(5, 45);
+    	boolean b1 = v.getCWAngleToAxis() == 45;
+    	v.setAngle(v.getAngle() + 80);
+    	boolean b2 = v.getCWAngleToAxis() == 45;
+    	v.setAngle(v.getAngle() + 90);
+    	boolean b3 = v.getCWAngleToAxis() == 45;
+    	v.setAngle(v.getAngle() + 90);
+    	boolean b4 = v.getCWAngleToAxis() == 45;	
+    	
+    	return b1 && b2 && b3 && b4;
 	}
 
 }

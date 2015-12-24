@@ -59,12 +59,16 @@ public class Scrum extends Renderable {
 		this.color = new Color(G.rgen.nextInt(255), G.rgen.nextInt(255),
 				G.rgen.nextInt(255));
 		
-		Logging.log("Number of sensors on current Scrum: " + numSensors, Logging.ALL); 
+//		Logging.log("Number of sensors on current Scrum: " + numSensors, Logging.ALL); 
 	}
 
 	public static Scrum randScrum(int x, int y) {
-		Vector2d velocity = new Vector2d(G.rgen.nextInt(5) + 1,
-				G.rgen.nextInt(360));
+		double mag = G.rgen.nextInt(5) + 1;
+		double dir = G.rgen.nextInt(360);
+		System.out.println("M & D: " + mag + ", " + dir);
+		Vector2d velocity = new Vector2d(mag, dir);
+		System.out.println("M & D: " + velocity.getMagnitude() + ", " + velocity.getAngle());
+		System.out.println("X & Y: " + velocity.getX() + ", " + velocity.getY());
 		int size = G.rgen.nextInt(20) + 5;
 		int energy = G.rgen.nextInt(1000) + 200;
 		int energyUseRate = G.rgen.nextInt(100);
@@ -79,8 +83,8 @@ public class Scrum extends Renderable {
 		sense();
 
 		// AI
-		Action plannedAction = G.aiEngine.computeAction(this);
-		this.velocity = plannedAction.velocity;
+//		Action plannedAction = G.aiEngine.computeAction(this);
+//		this.velocity = plannedAction.velocity;
 	}
 
 	public void sense() {
@@ -109,13 +113,13 @@ public class Scrum extends Renderable {
 
 		// Do velocity correction
 		if (xCood <= 0 && velocity.getX() < 0)
-			velocity.setX(velocity.getX() * -1.0);
+			this.velocity.reflectY();
 		if (yCood <= 0 && velocity.getY() < 0)
-			velocity.setY(velocity.getY() * -1.0);
+			this.velocity.reflectX();
 		if (xCood >= G.world.xSize && velocity.getX() > 0)
-			velocity.setX(velocity.getX() * -1.0);
+			this.velocity.reflectY();
 		if (yCood >= G.world.ySize && velocity.getY() > 0)
-			velocity.setY(velocity.getY() * -1.0);
+			this.velocity.reflectX();
 
 		think();
 	}
