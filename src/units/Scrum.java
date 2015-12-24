@@ -7,10 +7,10 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Circle;
 
+import ai_methods.Action;
 import util.Logging;
 import util.Vector2d;
 import util.VectorUtil;
-
 import static util.Logging.*;
 
 public class Scrum extends Renderable {
@@ -19,17 +19,22 @@ public class Scrum extends Renderable {
 
 	public int size;
 	public int energy;
-	public int energyUseRate;
+	public double energyUseRate = 100; // energy used per 100 pixels moved
+	public double maxMagnitude = 5;
 
 	public Color color;
 
 	public int numSensors;
 	private double angleStep;
+	
 	public double sensorAngleSpread = 45.0;
 	public double sensorRange = 200.0;
 	public double sensorMappingSlope = -1.0 / 40.0;
 	public double sensorB = (sensorRange * sensorMappingSlope * -1.0) + 1.0;
+	
 	public double[] sensorOutput;
+	public int[] sensorAdjustedValues;
+	public double[] sensorAngles;
 
 	public Scrum(int x, int y, Vector2d velocity, int size, int energy,
 			int energyUseRate, int numSensors) {
@@ -43,8 +48,13 @@ public class Scrum extends Renderable {
 		this.numSensors = numSensors;
 		this.angleStep = 360 / numSensors;
 		this.sensorOutput = new double[numSensors];
+		this.sensorAngles = new double[numSensors];
+		this.sensorAdjustedValues = new int[numSensors];
+		double curSensorAngle = 0;
 		for (int a = 0; a < numSensors; a++) {
 			sensorOutput[a] = sensorRange;
+			sensorAngles[a] = curSensorAngle;
+			curSensorAngle += angleStep;
 		}
 		this.color = new Color(G.rgen.nextInt(255), G.rgen.nextInt(255),
 				G.rgen.nextInt(255));
@@ -68,14 +78,12 @@ public class Scrum extends Renderable {
 		// sense
 		sense();
 
-		// weigh needs / situation
-
-		// decide
+		// AI
+		Action plannedAction = G.aiEngine.computeAction(this);
+		this.velocity = plannedAction.velocity;
 	}
 
 	public void sense() {
-		double curAngle = 0;
-		double angleStep = 360 / numSensors;
 		Food[] foods = G.world.getFoods();
 
 		for (int a = 0; a < numSensors; a++) {
@@ -83,7 +91,7 @@ public class Scrum extends Renderable {
 				if (foods[b] == null)
 					continue;
 				Food curFood = foods[b];
-				if (VectorUtil.isFoodInSector(this, curAngle,
+				if (VectorUtil.isFoodInSector(this, this.sensorAngles[a],
 						sensorAngleSpread, curFood.toVector2d(),
 						this.sensorRange)) {
 					this.sensorOutput[a] = distanceToFood(curFood);
@@ -91,7 +99,6 @@ public class Scrum extends Renderable {
 					this.sensorOutput[a] = sensorRange;
 				}
 			}
-			curAngle += angleStep;
 		}
 	}
 
@@ -121,36 +128,18 @@ public class Scrum extends Renderable {
 
 		// Initialize rotating vector to use to find positions of sensors
 		Vector2d rotV = new Vector2d(size + 5, 0);
-		if (G.oneTime) {
-			log(rotV.getX() + ", " + rotV.getY());
-			
-			logWord("[ ");
-			for(double d : this.sensorOutput){
-				logWord(d + ", ");
-			}
-			logWord(" ]\n"); 
-		}
-		
 		for (int a = 0; a < numSensors; a++) {
 			// Making sure sensor has output
 			if(sensorOutput[a] < 0) continue;
 			
 			int newX = (int) (xCood + rotV.getX());
 			int newY = (int) (yCood + rotV.getY());
-			double size = (sensorMappingSlope * (sensorOutput[a] + 1)) + sensorB;
+			sensorAdjustedValues[a] = (int) ((sensorMappingSlope * (sensorOutput[a] + 1)) + sensorB);
 			
-			Circle c1 = new Circle(newX, newY, (int) size);
+			Circle c1 = new Circle(newX, newY, sensorAdjustedValues[a]);
 			g.fill(c1);
 			
 			rotV.setAngle(rotV.getAngle() + angleStep);
-			
-			// Debugging Logging
-			if(G.oneTime){
-				if(a == numSensors - 1){
-					G.oneTime = false;
-				}
-				Logging.log("(" + newX + ", " + newY + ")", Logging.DEBUG); 
-			}
 		}
 	}
 

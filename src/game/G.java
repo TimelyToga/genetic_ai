@@ -2,6 +2,8 @@ package game;
 
 import java.util.Random;
 
+import ai_methods.AI;
+
 public class G {
 
 	
@@ -13,4 +15,6 @@ public class G {
 	public final static int CUR_LOG_LEVEL = 0;
 	
 	public static boolean pauseNextIT = false;
+	
+	public static AI aiEngine;
 }

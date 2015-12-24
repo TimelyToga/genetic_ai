@@ -11,6 +11,7 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.geom.Circle;
 
+import ai_methods.NaiveAI;
 import util.Logging;
 import util.Vector2d;
 
@@ -51,6 +52,7 @@ public class EvolutionGame extends BasicGame{
 		
 		G.rgen = new Random();
 		G.world = new World(screenX, screenY);
+		G.aiEngine = new NaiveAI();
 		
 	}
 
