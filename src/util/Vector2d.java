@@ -99,11 +99,7 @@ public class Vector2d {
 		return this.y;
 	}
 	
-	public void reflectX() {
-		System.out.println("reflectX");
-		System.out.println("Pre angle and mag: " + this.getAngle() + ", " + this.getMagnitude());
-		System.out.println("x, y: " + this.getX() + ", " + this.getY());
-		
+	public void reflectX() {	
 		double twoTheta;
 		if(inFirstOrThirdQuadrant()) {
 			// CW -2theta
@@ -114,16 +110,9 @@ public class Vector2d {
 			twoTheta = getCCWAngleToAxis()*2.0;
 			this.setAngle(this.getAngle() + twoTheta);
 		}
-		
-		System.out.println("theta: " + twoTheta / 2.0);
-		System.out.println("Post angle and mag: " + this.getAngle() + ", " + this.getMagnitude() + "\n");
 	}
 	
 	public void reflectY() {
-		System.out.println("reflectX");
-		System.out.println("Pre angle and mag: " + this.getAngle() + ", " + this.getMagnitude());
-		System.out.println("x, y: " + this.getX() + ", " + this.getY());
-		
 		double twoTheta;
 		if(!inFirstOrThirdQuadrant()) {
 			// CW -2theta
@@ -134,9 +123,6 @@ public class Vector2d {
 			twoTheta = getCCWAngleToAxis()*2.0;
 			this.setAngle(this.getAngle() + twoTheta);
 		}
-		
-		System.out.println("theta: " + twoTheta / 2.0);
-		System.out.println("Post angle and mag: " + this.getAngle() + ", " + this.getMagnitude() + "\n");
 	}
 	
 	public boolean inFirstOrThirdQuadrant() {
@@ -159,5 +145,25 @@ public class Vector2d {
 		}
 		
 		return 90 - angle;
+	}
+	
+	/**
+	 * Increase magnitude by %, by accelerating.
+	 * 
+	 * v' = aC * v
+	 * @param accelerationConstant # >0 that represents % increase
+	 */
+	public void accelerate(double accelerationConstant) {
+		this.setMagnitude(this.getMagnitude() * (1.0 + accelerationConstant));
+	}
+	
+	/**
+	 * Decrease magnitude by %, by decelerating.
+	 * 
+	 * v' = aC * v
+	 * @param accelerationConstant # >0 that represents % increase
+	 */
+	public void decelerate(double accelerationConstant) {
+		this.setMagnitude(this.getMagnitude() * (1.0 - accelerationConstant));
 	}
 }
