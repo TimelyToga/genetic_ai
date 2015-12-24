@@ -1,4 +1,4 @@
-package genetic_ai;
+package game;
 
 import java.time.zone.ZoneOffsetTransitionRule.TimeDefinition;
 import java.util.HashSet;

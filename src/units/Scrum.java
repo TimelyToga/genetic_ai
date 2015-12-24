@@ -3,8 +3,8 @@ package units;
 import java.util.HashSet;
 import java.util.Set;
 
-import genetic_ai.G;
-import genetic_ai.Renderable;
+import game.G;
+import game.Renderable;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
