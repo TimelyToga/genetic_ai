@@ -5,7 +5,7 @@ import org.newdawn.slick.Graphics;
 /**
  * Created by Tim on 17/12/14.
  */
-public interface Renderable {
+public abstract class Renderable {
 
     public boolean shouldRender = true;
     public boolean shouldUpdate = true;
@@ -13,8 +13,8 @@ public interface Renderable {
     public int xCood = 0;
     public int yCood = 0;
 
-    public void update(int xDelta, int yDelta, int timeDelta);
+    public abstract void update(int xDelta, int yDelta, int timeDelta);
 
-    public void render(Graphics g, int xOffset, int yOffset);
+    public abstract void render(Graphics g, int xOffset, int yOffset);
 
 }
