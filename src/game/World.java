@@ -71,7 +71,7 @@ public class World {
 		int y = G.rgen.nextInt(this.ySize);
 		Food f = new Food(x, y);
 		this.renderables.add(f);
-		this.foods.add(f);
+		this.foods.add(f);     
 	}
 	
 	public void addCenterFood() {
