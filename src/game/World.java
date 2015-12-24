@@ -52,6 +52,8 @@ public class World {
 		for(Renderable r: renderables){
 			r.update(0, 0, timeDelta);
 		}
+		
+		checkFoodGathering();
 	}
 	
 	public Food[] getFoods(){
@@ -86,5 +88,15 @@ public class World {
 		this.scrums.add(s);
 	}
 	
+	private void checkFoodGathering() {
+		for(Food f: foods) {
+			for(Scrum s: scrums) {
+				if(f.intersectWithScrum(s)) {
+					s.consumeFood(f);
+				}
+			}
+		}
+	}
+		
 	
 }

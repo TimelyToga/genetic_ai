@@ -56,7 +56,7 @@ public class Food extends Renderable {
 	}
 	
 	public boolean intersectWithScrum(Scrum s) {
-		
+		return s.distanceToFood(this) < (this.size + s.size);
 	}
 	
 }

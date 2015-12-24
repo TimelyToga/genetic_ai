@@ -153,4 +153,9 @@ public class Scrum extends Renderable {
 		output.setY(yCood);
 		return output;
 	}
+	
+	public void consumeFood(Food f) {
+		this.energy += f.consume();
+		log(String.valueOf(this.energy));
+	}
 }
