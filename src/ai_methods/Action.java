@@ -1,4 +1,4 @@
-package units;
+package ai_methods;
 
 import util.Vector2d;
 
