@@ -28,13 +28,19 @@ public class Scrum extends Renderable {
 	private double angleStep;
 	
 	public double sensorAngleSpread = 45.0;
-	public double sensorRange = 200.0;
+	public double sensorRange = 300.0;
 	public double sensorMappingSlope = -1.0 / 40.0;
 	public double sensorB = (sensorRange * sensorMappingSlope * -1.0) + 1.0;
 	
 	public double[] sensorOutput;
 	public int[] sensorAdjustedValues;
 	public double[] sensorAngles;
+	
+	public double wallBounceEnergyCoef = 0.95; // Must be (0-1]
+	public double accelK = 1.0 / 60.0; // Divide by 60 to spread over 60 frames (1s)
+	public double rotK = 180.0 / 60.0; 
+	public double smallestRot = 0.05;
+	public double rotK2 = 0.4;
 
 	public Scrum(int x, int y, Vector2d velocity, int size, int energy,
 			int energyUseRate, int numSensors) {
@@ -78,13 +84,34 @@ public class Scrum extends Renderable {
 				numSensors);
 	}
 
+	@Override
+	public void update(int xDelta, int yDelta, int timeDelta) {
+		this.xCood += velocity.getX();
+		this.yCood += velocity.getY();
+
+		// Direction correction from bounce
+		if ((xCood <= 0 && velocity.getX() < 0) || (xCood >= G.world.xSize && velocity.getX() > 0)) {
+			this.velocity.reflectY();
+			// Minorly reduce speed from bounce
+			this.velocity.setMagnitude(this.velocity.getMagnitude() * this.wallBounceEnergyCoef);
+		}
+		
+		if ((yCood <= 0 && velocity.getY() < 0) || (yCood >= G.world.ySize && velocity.getY() > 0)) {
+			this.velocity.reflectX();
+			// Minorly reduce speed from bounce
+			this.velocity.setMagnitude(this.velocity.getMagnitude() * this.wallBounceEnergyCoef);
+		}
+		
+		think();
+	}
+	
 	public void think() {
 		// sense
 		sense();
 
 		// AI
-//		Action plannedAction = G.aiEngine.computeAction(this);
-//		this.velocity = plannedAction.velocity;
+		Action plannedAction = G.aiEngine.computeAction(this);
+		accelerateToVelocity(plannedAction.velocity);
 	}
 
 	public void sense() {
@@ -104,24 +131,6 @@ public class Scrum extends Renderable {
 				}
 			}
 		}
-	}
-
-	@Override
-	public void update(int xDelta, int yDelta, int timeDelta) {
-		this.xCood += velocity.getX();
-		this.yCood += velocity.getY();
-
-		// Do velocity correction
-		if (xCood <= 0 && velocity.getX() < 0)
-			this.velocity.reflectY();
-		if (yCood <= 0 && velocity.getY() < 0)
-			this.velocity.reflectX();
-		if (xCood >= G.world.xSize && velocity.getX() > 0)
-			this.velocity.reflectY();
-		if (yCood >= G.world.ySize && velocity.getY() > 0)
-			this.velocity.reflectX();
-
-		think();
 	}
 
 	@Override
@@ -161,5 +170,42 @@ public class Scrum extends Renderable {
 	public void consumeFood(Food f) {
 		this.energy += f.consume();
 		log(String.valueOf(this.energy));
+	}
+	
+	/**
+	 * This method makes maximal changes to Scrum's velocity to make it more move like a given vector
+	 * 
+	 * @param otherVector Vector to be matched after several iterations 
+	 * @param accelK Acceleration Constant
+	 * @param rotationK Rotation Constant
+	 */
+	public void accelerateToVelocity(Vector2d otherVector) {
+		double difference = otherVector.getAngle() - velocity.getAngle();
+//		if(Math.abs(difference) > smallestRot) {
+//		double rotAmount = (difference > rotK) ? rotK : difference;
+//		double factor = (difference > 0) ? 1.0 : -1.0;
+//		double newAngle = velocity.getAngle() + (factor * rotAmount);
+			
+		double rotAmount = difference * rotK2;
+		rotAmount = (rotAmount > smallestRot) ? rotAmount : 0.0;
+		double newAngle = velocity.getAngle() + rotAmount;
+	
+		velocity.setAngle(newAngle);
+//		} else {
+//			System.out.println(difference);
+//		}
+		double mDifference = otherVector.getMagnitude() - velocity.getMagnitude();
+		double aAmount = (mDifference > accelK) ? accelK : mDifference;
+//		if(Math.abs(difference) > accelK) {
+		double mFactor = (mDifference > 0) ? 1.0 : -1.0;
+		double newMagnitude = velocity.getMagnitude() + (mFactor * aAmount);
+		newMagnitude = (newMagnitude > maxMagnitude) ? maxMagnitude : newMagnitude;
+		
+		velocity.setMagnitude(newMagnitude);
+//		}
+//		double newMagnitude = (otherVector.getMagnitude() > velocity.getMagnitude())
+//				? velocity.getMagnitude() + accelK
+//				: velocity.getMagnitude() - accelK;
+//		velocity.setMagnitude(newMagnitude);
 	}
 }
