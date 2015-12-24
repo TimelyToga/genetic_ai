@@ -27,9 +27,10 @@ public class Scrum extends Renderable {
 	public Color color;
 
 	public int numSensors;
-	public double sensorAngleSpread = 15;
-	public double sensorRange = 400;
-	public double sensorVisualizationMappingSlope = 1/10;
+	public double sensorAngleSpread = 15.0;
+	public double sensorRange = 200.0;
+	public double sensorMappingSlope = -1.0 / 20.0;
+	public double sensorB = (sensorRange * sensorMappingSlope * -1.0) + 1.0;
 	public double[] sensorOutput;
 
 	public Scrum(int x, int y, Vector2d velocity, int size, int energy,
@@ -44,10 +45,12 @@ public class Scrum extends Renderable {
 		this.numSensors = numSensors;
 		this.sensorOutput = new double[numSensors];
 		for (int a = 0; a < numSensors; a++) {
-			sensorOutput[a] = -1;
+			sensorOutput[a] = sensorRange;
 		}
 		this.color = new Color(G.rgen.nextInt(255), G.rgen.nextInt(255),
 				G.rgen.nextInt(255));
+		
+		Logging.log("Number of sensors on current Scrum: " + numSensors, Logging.ALL); 
 	}
 
 	public static Scrum randScrum(int x, int y) {
@@ -56,7 +59,7 @@ public class Scrum extends Renderable {
 		int size = G.rgen.nextInt(20) + 5;
 		int energy = G.rgen.nextInt(1000) + 200;
 		int energyUseRate = G.rgen.nextInt(100);
-		int numSensors = G.rgen.nextInt(8) + 1;
+		int numSensors = G.rgen.nextInt(4) + 4;
 
 		return new Scrum(x, y, velocity, size, energy, energyUseRate,
 				numSensors);
@@ -86,7 +89,7 @@ public class Scrum extends Renderable {
 						this.sensorRange)) {
 					this.sensorOutput[a] = distanceToFood(curFood);
 				} else {
-					this.sensorOutput[a] = 0;
+					this.sensorOutput[a] = -1.0;
 				}
 			}
 			curAngle += angleStep;
@@ -98,6 +101,7 @@ public class Scrum extends Renderable {
 		this.xCood += velocity.getX();
 		this.yCood += velocity.getY();
 
+		// Do velocity correction
 		if (xCood <= 0)
 			velocity.setX(velocity.getX() * -1.0);
 		if (yCood <= 0)
@@ -132,10 +136,15 @@ public class Scrum extends Renderable {
 		double angleStep = 360 / numSensors;
 		
 		for (int a = 0; a < numSensors; a++) {
+			// Making sure sensor has output
+			if(sensorOutput[a] < 0) continue;
+			
 			int newX = (int) (xCood + rotV.getX());
 			int newY = (int) (yCood + rotV.getY());
-			int size = (int) ((sensorVisualizationMappingSlope * sensorOutput[a]) + 2);
-			Circle c1 = new Circle(newX, newY, size);
+			double size = (sensorMappingSlope * (sensorOutput[a] + 1)) + sensorB;
+			if(sensorOutput[a] < 50 && sensorOutput[a] > 0)
+				Logging.log(String.valueOf(size));
+			Circle c1 = new Circle(newX, newY, (int) size);
 			g.fill(c1);
 //			g.drawString(String.valueOf(sensorOutput[a]), newX, newY);
 			rotV.setAngle(rotV.getAngle() + angleStep);
