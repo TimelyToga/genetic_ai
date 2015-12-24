@@ -11,4 +11,6 @@ public class G {
 	public static boolean oneTime = true;
 	public final static boolean verbose = false;
 	public final static int CUR_LOG_LEVEL = 0;
+	
+	public static boolean pauseNextIT = false;
 }
