@@ -1,4 +1,4 @@
-package genetic_ai;
+package game;
 
 import org.newdawn.slick.Graphics;
 

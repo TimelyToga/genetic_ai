@@ -5,8 +5,8 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Circle;
 
 import util.Vector2d;
-import genetic_ai.G;
-import genetic_ai.Renderable;
+import game.G;
+import game.Renderable;
 
 public class Food extends Renderable {
 
