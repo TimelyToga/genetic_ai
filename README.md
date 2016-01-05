@@ -2,7 +2,7 @@
 AI that learns to play a game through a genetic evolution algorithm. There is a defined game where small circles attempt to live as long as possible. They burn energy at an individual rate, and every action burns energy. They can gain energy by consuming a food object that is randomly spawned into the game.
 
 The best of the actors are then skimmed off, randomly paired with other top actors, with whom their parameters (genes), are mixed (genetic crossover) to create a model for the next generation. The next generation is then created by randomly perturbing each of the actor's parameters. This process is repeated for as long as defined in the simulation.
-
+q
 ## Game Design
 The game itself is written using the Java library [Slick2D](http://slick.ninjacave.com/), which is a Java game engine,
 which is implemented using the [LWJGL](https://www.lwjgl.org/).

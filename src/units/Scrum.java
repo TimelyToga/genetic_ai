@@ -18,9 +18,10 @@ public class Scrum extends Renderable {
 	public Vector2d velocity;
 
 	public int size;
+	public double heading;
 	public int energy;
 	public double energyUseRate = 100; // energy used per 100 pixels moved
-	public double maxMagnitude = 5;
+	public double maxMagnitude = 2;
 
 	public Color color;
 
@@ -41,12 +42,15 @@ public class Scrum extends Renderable {
 	public double rotK = 180.0 / 60.0; 
 	public double smallestRot = 0.05;
 	public double rotK2 = 0.4;
+	
+	private double turnSpeed = 2.0;
 
 	public Scrum(int x, int y, Vector2d velocity, int size, int energy,
 			int energyUseRate, int numSensors) {
 		this.xCood = x;
 		this.yCood = y;
 		this.velocity = velocity;
+		this.heading = velocity.getAngle();
 		// this.size = size;
 		this.size = 10;
 		this.energy = energy;
@@ -86,6 +90,7 @@ public class Scrum extends Renderable {
 
 	@Override
 	public void update(int xDelta, int yDelta, int timeDelta) {
+		// Update position
 		this.xCood += velocity.getX();
 		this.yCood += velocity.getY();
 
@@ -94,24 +99,20 @@ public class Scrum extends Renderable {
 			this.velocity.reflectY();
 			// Minorly reduce speed from bounce
 			this.velocity.setMagnitude(this.velocity.getMagnitude() * this.wallBounceEnergyCoef);
-		}
-		
-		if ((yCood <= 0 && velocity.getY() < 0) || (yCood >= G.world.ySize && velocity.getY() > 0)) {
+		} if ((yCood <= 0 && velocity.getY() < 0) || (yCood >= G.world.ySize && velocity.getY() > 0)) {
 			this.velocity.reflectX();
 			// Minorly reduce speed from bounce
 			this.velocity.setMagnitude(this.velocity.getMagnitude() * this.wallBounceEnergyCoef);
 		}
-		
-		think();
-	}
-	
-	public void think() {
+				
 		// sense
 		sense();
 
 		// AI
 		Action plannedAction = G.aiEngine.computeAction(this);
-		accelerateToVelocity(plannedAction.velocity);
+		System.out.println(plannedAction);
+		this.velocity = plannedAction.velocity;
+		// accelerateToVelocity(plannedAction.velocity, timeDelta);
 	}
 
 	public void sense() {
@@ -170,6 +171,11 @@ public class Scrum extends Renderable {
 	public void consumeFood(Food f) {
 		this.energy += f.consume();
 		log(String.valueOf(this.energy));
+		
+		for(int a = 0; a < numSensors; a++) {
+			sensorAdjustedValues[a] = 0;
+		}
+		System.exit(0);;
 	}
 	
 	/**
@@ -179,13 +185,15 @@ public class Scrum extends Renderable {
 	 * @param accelK Acceleration Constant
 	 * @param rotationK Rotation Constant
 	 */
-	public void accelerateToVelocity(Vector2d otherVector) {
+	public void accelerateToVelocity(Vector2d otherVector, int timeDelta) {
 		double difference = otherVector.getAngle() - velocity.getAngle();
 //		if(Math.abs(difference) > smallestRot) {
 //		double rotAmount = (difference > rotK) ? rotK : difference;
 //		double factor = (difference > 0) ? 1.0 : -1.0;
 //		double newAngle = velocity.getAngle() + (factor * rotAmount);
-			
+		if(difference > smallestRot)
+			this.velocity.setMagnitude(turnSpeed);
+		
 		double rotAmount = difference * rotK2;
 		rotAmount = (rotAmount > smallestRot) ? rotAmount : 0.0;
 		double newAngle = velocity.getAngle() + rotAmount;
@@ -194,14 +202,14 @@ public class Scrum extends Renderable {
 //		} else {
 //			System.out.println(difference);
 //		}
-		double mDifference = otherVector.getMagnitude() - velocity.getMagnitude();
-		double aAmount = (mDifference > accelK) ? accelK : mDifference;
-//		if(Math.abs(difference) > accelK) {
-		double mFactor = (mDifference > 0) ? 1.0 : -1.0;
-		double newMagnitude = velocity.getMagnitude() + (mFactor * aAmount);
-		newMagnitude = (newMagnitude > maxMagnitude) ? maxMagnitude : newMagnitude;
-		
-		velocity.setMagnitude(newMagnitude);
+//		double mDifference = otherVector.getMagnitude() - velocity.getMagnitude();
+//		double aAmount = (mDifference > accelK) ? accelK : mDifference;
+////		if(Math.abs(difference) > accelK) {
+//		double mFactor = (mDifference > 0) ? 1.0 : -1.0;
+//		double newMagnitude = velocity.getMagnitude() + (mFactor * aAmount);
+//		newMagnitude = (newMagnitude > maxMagnitude) ? maxMagnitude : newMagnitude;
+//		
+//		velocity.setMagnitude(newMagnitude);
 //		}
 //		double newMagnitude = (otherVector.getMagnitude() > velocity.getMagnitude())
 //				? velocity.getMagnitude() + accelK
