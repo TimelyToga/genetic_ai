@@ -1,5 +1,9 @@
 package util;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import units.Scrum;
 import game.G;
 
 public class GeneticUtil {

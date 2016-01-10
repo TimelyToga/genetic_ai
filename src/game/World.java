@@ -33,13 +33,6 @@ public class World {
 		scrums = new HashSet<Scrum>();
 		renderables = new HashSet<Renderable>();
 		foods = new HashSet<Food>();
-		
-		// Initialize population
-		for(int a = 0; a < initialNumScrums; a++){
-			addRandScrum();
-		}
-		
-		addCenterFood();
 	}
 	
 	public void render(Graphics g, int xOffset, int yOffset){
@@ -84,6 +77,11 @@ public class World {
 		int x = G.rgen.nextInt(this.xSize);
 		int y = G.rgen.nextInt(this.ySize);
 		Scrum s = Scrum.randScrum(x, y);
+		this.renderables.add(s);
+		this.scrums.add(s);
+	}
+	
+	public void addScrum(Scrum s) {
 		this.renderables.add(s);
 		this.scrums.add(s);
 	}

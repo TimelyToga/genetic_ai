@@ -70,5 +70,36 @@ public class Tests {
     		System.out.println(i);
     	}
 	}
+	
+	public void createScrumArrayCodes() {
+		String[] data = {	"xCood",
+				"yCood", 
+				"angle", 
+				"magnitude",
+				"size", 
+				"energy",
+				"energyUseRate", 
+				"numSensors",
+				"maxMagnitude",
+				"sensorOffset",
+				"sensorAngleSpread",
+				"sensorRange",
+				"sensorMappingSlope",
+				"wallBounceEnergyCoef",
+				"accelK",
+				"rotK"	};
+		
+		for(int b = 0; b < data.length; b++) {
+			String[] stringArray = data[b].split("(?=\\p{Upper})");
+			StringBuilder sb = new StringBuilder();
+			for(int a = 0; a < stringArray.length; a++) {
+				sb.append(stringArray[a].toUpperCase());
+				if(a != stringArray.length - 1) {
+					sb.append("_");
+				}
+			}
+			System.out.println("public final static int C_" + sb.toString() + " = " + b + ";");
+		}
+	}
 
 }

@@ -12,6 +12,8 @@ import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.geom.Circle;
 
 import ai_methods.NaiveAI;
+import sim.Simulation;
+import util.GeneticUtil;
 import util.Logging;
 import util.Vector2d;
 
@@ -21,19 +23,19 @@ public class EvolutionGame extends BasicGame{
 		super("EvolutionGame");
 	}
 
-	private static int screenX = 640;
-	private static int screenY = 480;
-
     public static void main(String[] args) {
-        try {
-            AppGameContainer app = new AppGameContainer(new EvolutionGame());
-            app.setDisplayMode(screenX, screenY, false);
-            
-            Logging.log("Screen width, height: " + screenX + ", " + screenY, Logging.VERBOSE);
-            app.start();
-        } catch (SlickException e) {
-            e.printStackTrace();
-        }	
+		// Create Game
+	    AppGameContainer app;
+		try {
+			app = new AppGameContainer(new EvolutionGame());
+		    app.setDisplayMode(G.SCREEN_X, G.SCREEN_Y, false);
+		    Logging.log("Screen width, height: " + G.SCREEN_X + ", " + G.SCREEN_Y, Logging.VERBOSE);
+
+		    app.start();
+
+		} catch (SlickException e) {
+			e.printStackTrace();
+		}
     }
 
     @Override
@@ -51,9 +53,9 @@ public class EvolutionGame extends BasicGame{
 		container.getGraphics().setBackground(new Color(255, 255, 255));
 		
 		G.rgen = new Random();
-		G.world = new World(screenX, screenY);
+		G.world = new World(G.SCREEN_X, G.SCREEN_Y);
 		G.aiEngine = new NaiveAI();
-		
+		G.se = new Simulation();
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package units;
 
+import java.util.Comparator;
+
 import game.G;
 import game.Renderable;
 
@@ -14,7 +16,7 @@ import util.VectorUtil;
 import static util.Logging.*;
 import static util.GeneticUtil.*;
 
-public class Scrum extends Renderable {
+public class Scrum extends Renderable implements Comparable<Scrum> {
 
 	public Vector2d velocity;
 	public double heading;
@@ -45,6 +47,25 @@ public class Scrum extends Renderable {
 	private double sensorB;
 	private double turnSpeed = 2.0;
 	
+	// Parameter Codes
+	public final static int NUM_PARAMETERS = 16;
+	
+	public final static int C_X_COOD = 0;
+	public final static int C_Y_COOD = 1;
+	public final static int C_ANGLE = 2;
+	public final static int C_MAGNITUDE = 3;
+	public final static int C_SIZE = 4;
+	public final static int C_ENERGY = 5;
+	public final static int C_ENERGY_USE_RATE = 6;
+	public final static int C_NUM_SENSORS = 7;
+	public final static int C_MAX_MAGNITUDE = 8;
+	public final static int C_SENSOR_OFFSET = 9;
+	public final static int C_SENSOR_ANGLE_SPREAD = 10;
+	public final static int C_SENSOR_RANGE = 11;
+	public final static int C_SENSOR_MAPPING_SLOPE = 12;
+	public final static int C_WALL_BOUNCE_ENERGY_COEF = 13;
+	public final static int C_ACCEL_K = 14;
+	public final static int C_ROT_K = 15;
 	
 	public Scrum(int x, int y, Vector2d velocity, int size, int energy,
 			int energyUseRate, int numSensors, double maxMagnitude,
@@ -87,6 +108,47 @@ public class Scrum extends Renderable {
 		
 //		Logging.log("Number of sensors on current Scrum: " + numSensors, Logging.ALL); 
 	}
+	
+	// Create scrum from data array
+	public static Scrum createFromData(double[] data) {
+		if(data.length != NUM_PARAMETERS) return null;
+		Vector2d velocity = new Vector2d(data[C_ANGLE], data[C_MAGNITUDE]);
+		
+		return new Scrum((int) data[C_X_COOD], 
+				(int) data[C_Y_COOD], 
+				velocity, 
+				(int) data[C_SIZE], 
+				(int) data[C_ENERGY], 
+				(int) data[C_ENERGY_USE_RATE], 
+				(int) data[C_NUM_SENSORS], 
+				data[C_MAX_MAGNITUDE],
+				data[C_SENSOR_OFFSET], 
+				data[C_SENSOR_ANGLE_SPREAD], 
+				data[C_SENSOR_RANGE], 
+				data[C_SENSOR_MAPPING_SLOPE], 
+				data[C_WALL_BOUNCE_ENERGY_COEF], 
+				data[C_ACCEL_K], 
+				data[C_ROT_K]);
+	}
+	
+	public void updateFromData(ScrumGene sg) {
+		double[] data = sg.genes;
+		this.xCood = (int) data[C_X_COOD];
+		this.yCood = (int) data[C_Y_COOD];
+		this.velocity = velocity;
+		this.size = (int) data[C_SIZE];
+		this.energy = (int) data[C_ENERGY];
+		this.energyUseRate = (int) data[C_ENERGY_USE_RATE]; 
+		this.numSensors = (int) data[C_NUM_SENSORS];
+		this.maxMagnitude = data[C_MAX_MAGNITUDE];
+		this.sensorOffset = data[C_SENSOR_OFFSET];
+		this.sensorAngleSpread = data[C_SENSOR_ANGLE_SPREAD];
+		this.sensorRange = data[C_SENSOR_RANGE];
+		this.sensorMappingSlope = data[C_SENSOR_MAPPING_SLOPE] ;
+		this.wallBounceEnergyCoef = data[C_WALL_BOUNCE_ENERGY_COEF] ;
+		this.accelK = data[C_ACCEL_K];
+		this.rotK = data[C_ROT_K];
+	}
 
 	public static Scrum randScrum(int x, int y) {
 		double mag = G.rgen.nextInt(5) + 1;
@@ -94,9 +156,9 @@ public class Scrum extends Renderable {
 		Vector2d velocity = new Vector2d(mag, dir);
 		
 		int size = perturbInt(G.D_SIZE);
-		int energy = perturbInt(G.D_ENERGY);
-		int energyUseRate = perturbInt(G.D_ENERGY_USE_RATE);
-		int numSensors = perturbInt(G.D_NUM_SENSORS);
+		int energy = perturbInt(G.D_ENERGY) + 200;
+		int energyUseRate = perturbInt(G.D_ENERGY_USE_RATE) + 10;
+		int numSensors = perturbInt(G.D_NUM_SENSORS) + 2;
 		double maxMagnitude = perturbDouble(G.D_MAX_MAGNITUDE);
 		double sensorOffset = perturbDouble(G.D_SENSOR_OFFSET);;
 		double sensorAngleSpread = perturbDouble(G.D_SENSOR_ANGLE_SPREAD);
@@ -222,5 +284,43 @@ public class Scrum extends Renderable {
 		double newAngle = velocity.getAngle() + rotAmount;
 	
 		velocity.setAngle(newAngle);
+	}
+	
+	public double[] getAsData() {
+		double[] data = {	this.xCood,
+							this.yCood, 
+							velocity.getAngle(), 
+							velocity.getMagnitude(),
+							size, 
+							energy,
+							energyUseRate, 
+							numSensors,
+							maxMagnitude,
+							sensorOffset,
+							sensorAngleSpread,
+							sensorRange,
+							sensorMappingSlope,
+							wallBounceEnergyCoef,
+							accelK,
+							rotK	};
+		return data;
+	}
+	
+	public ScrumGene getGenes() {
+		return new ScrumGene(this.getAsData(), this);
+	}
+	
+	public Scrum crossGenes(Scrum other) {
+		ScrumGene myGenes = this.getGenes();
+		ScrumGene otherGenes = other.getGenes();
+		otherGenes = myGenes.crossWith(otherGenes);
+		this.updateFromData(myGenes);
+		other.updateFromData(otherGenes);
+		return other;
+	}
+
+	@Override
+	public int compareTo(Scrum o) {
+		return this.energy - o.energy;
 	}
 }
