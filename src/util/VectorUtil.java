@@ -35,5 +35,11 @@ public class VectorUtil {
 	public static boolean withinRadius(Vector2d v, double radiusSquared){
 		return (v.getX()*v.getX() + v.getY()*v.getY()) <= radiusSquared;
 	}
+	
+	public static double calcDirectionAngle(double maxSensorVal, double maxSensorAngle, 
+			double penultSensorVal, double penultSensorAngle) {
+		
+		return 0;
+	}
 
 }

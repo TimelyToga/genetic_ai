@@ -12,62 +12,78 @@ import util.Logging;
 import util.Vector2d;
 import util.VectorUtil;
 import static util.Logging.*;
+import static util.GeneticUtil.*;
 
 public class Scrum extends Renderable {
 
 	public Vector2d velocity;
+	public double heading;
+	public double maxMagnitude = 5;
 
 	public int size;
-	public double heading;
 	public int energy;
-	public double energyUseRate = 100; // energy used per 100 pixels moved
-	public double maxMagnitude = 2;
-
-	public Color color;
-
-	public int numSensors;
-	private double angleStep;
+	public double energyUseRate; 			// = 100; // energy used per 100 pixels moved
+	public double wallBounceEnergyCoef; 	// = 0.95; // Must be (0-1]
+	public double accelK;               	// = 1.0 / 60.0; // Divide by 60 to spread over 60 frames (1s)
+	public double rotK; 					// = 180.0 / 60.0; 
+	public double smallestRot = 0.05;
+	public double rotK2 = 0.4;
 	
-	public double sensorAngleSpread = 45.0;
-	public double sensorRange = 300.0;
-	public double sensorMappingSlope = -1.0 / 40.0;
-	public double sensorB = (sensorRange * sensorMappingSlope * -1.0) + 1.0;
+	public int numSensors;
+	public double sensorAngleSpread; 		// = 45.0;
+	public double sensorRange; 				// = 300.0;
+	public double sensorMappingSlope; 		// = -1.0 / 40.0;
+	public double sensorOffset; 			// = 5;
+
 	
 	public double[] sensorOutput;
 	public int[] sensorAdjustedValues;
 	public double[] sensorAngles;
 	
-	public double wallBounceEnergyCoef = 0.95; // Must be (0-1]
-	public double accelK = 1.0 / 60.0; // Divide by 60 to spread over 60 frames (1s)
-	public double rotK = 180.0 / 60.0; 
-	public double smallestRot = 0.05;
-	public double rotK2 = 0.4;
-	
+	private Color color;
+	private double angleStep;
+	private double sensorB;
 	private double turnSpeed = 2.0;
-
+	
+	
 	public Scrum(int x, int y, Vector2d velocity, int size, int energy,
-			int energyUseRate, int numSensors) {
+			int energyUseRate, int numSensors, double maxMagnitude,
+			double sensorOffset, double sensorAngleSpread, double sensorRange,
+			double sensorMappingSlope, double wallBounceEnergyCoef,
+			double accelK, double rotK) {
+		// Set traits
 		this.xCood = x;
 		this.yCood = y;
 		this.velocity = velocity;
 		this.heading = velocity.getAngle();
-		// this.size = size;
-		this.size = 10;
+		this.size = 10; // = size
 		this.energy = energy;
 		this.energyUseRate = energyUseRate;
 		this.numSensors = numSensors;
-		this.angleStep = 360 / numSensors;
 		this.sensorOutput = new double[numSensors];
 		this.sensorAngles = new double[numSensors];
 		this.sensorAdjustedValues = new int[numSensors];
+		this.maxMagnitude = maxMagnitude;
+		this.sensorOffset = sensorOffset;
+		this.sensorAngleSpread = sensorAngleSpread;
+		this.sensorRange = sensorRange;
+		this.sensorMappingSlope = sensorMappingSlope;
+		this.wallBounceEnergyCoef = wallBounceEnergyCoef;
+		this.accelK = accelK;
+		this.rotK = rotK;
+		
+		// Calculate Traits
+		this.angleStep = 360 / numSensors;
+		sensorB = (sensorRange * sensorMappingSlope * -1.0) + 1.0;
+		this.color = new Color(G.rgen.nextInt(255), G.rgen.nextInt(255),
+				G.rgen.nextInt(255));
+		
 		double curSensorAngle = 0;
 		for (int a = 0; a < numSensors; a++) {
 			sensorOutput[a] = sensorRange;
 			sensorAngles[a] = curSensorAngle;
 			curSensorAngle += angleStep;
 		}
-		this.color = new Color(G.rgen.nextInt(255), G.rgen.nextInt(255),
-				G.rgen.nextInt(255));
 		
 //		Logging.log("Number of sensors on current Scrum: " + numSensors, Logging.ALL); 
 	}
@@ -75,17 +91,23 @@ public class Scrum extends Renderable {
 	public static Scrum randScrum(int x, int y) {
 		double mag = G.rgen.nextInt(5) + 1;
 		double dir = G.rgen.nextInt(360);
-		System.out.println("M & D: " + mag + ", " + dir);
 		Vector2d velocity = new Vector2d(mag, dir);
-		System.out.println("M & D: " + velocity.getMagnitude() + ", " + velocity.getAngle());
-		System.out.println("X & Y: " + velocity.getX() + ", " + velocity.getY());
-		int size = G.rgen.nextInt(20) + 5;
-		int energy = G.rgen.nextInt(1000) + 200;
-		int energyUseRate = G.rgen.nextInt(100);
-		int numSensors = G.rgen.nextInt(4) + 20;
+		
+		int size = perturbInt(G.D_SIZE);
+		int energy = perturbInt(G.D_ENERGY);
+		int energyUseRate = perturbInt(G.D_ENERGY_USE_RATE);
+		int numSensors = perturbInt(G.D_NUM_SENSORS);
+		double maxMagnitude = perturbDouble(G.D_MAX_MAGNITUDE);
+		double sensorOffset = perturbDouble(G.D_SENSOR_OFFSET);;
+		double sensorAngleSpread = perturbDouble(G.D_SENSOR_ANGLE_SPREAD);
+		double sensorRange = perturbDouble(G.D_SENSOR_RANGE);
+		double sensorMappingSlope = perturbDouble(G.D_SENSOR_MAPPING_SLOPE);
+		double wallBounceEnergyCoef = perturbDouble(G.D_WALL_BOUNCE_ENERGY_COEF);
+		double accelK = perturbDouble(G.D_ACCEL_K);
+		double rotK = perturbDouble(G.D_ROT_K);
 
 		return new Scrum(x, y, velocity, size, energy, energyUseRate,
-				numSensors);
+				numSensors, maxMagnitude, sensorOffset, sensorAngleSpread, sensorRange, sensorMappingSlope, wallBounceEnergyCoef, accelK, rotK);
 	}
 
 	@Override
@@ -126,7 +148,8 @@ public class Scrum extends Renderable {
 				if (VectorUtil.isFoodInSector(this, this.sensorAngles[a],
 						sensorAngleSpread, curFood.toVector2d(),
 						this.sensorRange)) {
-					this.sensorOutput[a] = distanceToFood(curFood);
+					double offsetAngle = sensorAngles[a];
+					this.sensorOutput[a] = distanceToFood(curFood, new Vector2d(sensorOffset, offsetAngle));
 				} else {
 					this.sensorOutput[a] = sensorRange;
 				}
@@ -141,7 +164,7 @@ public class Scrum extends Renderable {
 		g.fill(c);
 
 		// Initialize rotating vector to use to find positions of sensors
-		Vector2d rotV = new Vector2d(size + 5, 0);
+		Vector2d rotV = new Vector2d(size + sensorOffset, 0);
 		for (int a = 0; a < numSensors; a++) {
 			// Making sure sensor has output
 			if(sensorOutput[a] < 0) continue;
@@ -157,8 +180,12 @@ public class Scrum extends Renderable {
 		}
 	}
 
+	public double distanceToFood(Food f, Vector2d sensorOffset) {
+		return f.toVector2d().add(sensorOffset).distTo(this.toVector2d());
+	}
+	
 	public double distanceToFood(Food f) {
-		return f.toVector2d().distTo(this.toVector2d());
+		return distanceToFood(f, new Vector2d(0,0));
 	}
 
 	public Vector2d toVector2d() {
@@ -187,10 +214,6 @@ public class Scrum extends Renderable {
 	 */
 	public void accelerateToVelocity(Vector2d otherVector, int timeDelta) {
 		double difference = otherVector.getAngle() - velocity.getAngle();
-//		if(Math.abs(difference) > smallestRot) {
-//		double rotAmount = (difference > rotK) ? rotK : difference;
-//		double factor = (difference > 0) ? 1.0 : -1.0;
-//		double newAngle = velocity.getAngle() + (factor * rotAmount);
 		if(difference > smallestRot)
 			this.velocity.setMagnitude(turnSpeed);
 		
@@ -199,21 +222,5 @@ public class Scrum extends Renderable {
 		double newAngle = velocity.getAngle() + rotAmount;
 	
 		velocity.setAngle(newAngle);
-//		} else {
-//			System.out.println(difference);
-//		}
-//		double mDifference = otherVector.getMagnitude() - velocity.getMagnitude();
-//		double aAmount = (mDifference > accelK) ? accelK : mDifference;
-////		if(Math.abs(difference) > accelK) {
-//		double mFactor = (mDifference > 0) ? 1.0 : -1.0;
-//		double newMagnitude = velocity.getMagnitude() + (mFactor * aAmount);
-//		newMagnitude = (newMagnitude > maxMagnitude) ? maxMagnitude : newMagnitude;
-//		
-//		velocity.setMagnitude(newMagnitude);
-//		}
-//		double newMagnitude = (otherVector.getMagnitude() > velocity.getMagnitude())
-//				? velocity.getMagnitude() + accelK
-//				: velocity.getMagnitude() - accelK;
-//		velocity.setMagnitude(newMagnitude);
 	}
 }
