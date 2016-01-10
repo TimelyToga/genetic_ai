@@ -1,5 +1,7 @@
 package testing;
 
+import java.util.Random;
+
 import util.Vector2d;
 
 public class Tests {
@@ -31,6 +33,42 @@ public class Tests {
     	boolean b4 = v.getCWAngleToAxis() == 45;	
     	
     	return b1 && b2 && b3 && b4;
+	}
+	
+	public void testGaussionDist() {
+    	Random r = new Random();
+    	double total = 0;
+    	double iterations = 1000000;
+    	
+    	// Setup buckets
+    	int numBuckets = 10;
+    	int[] counts = new int[numBuckets];
+    	double range = 20;
+    	double min = range/2 *-1;
+    	double max = min *-1;
+    	double bucketSize = range / (double) numBuckets;
+    	
+    	for(int a = 0; a < iterations; a++) {
+    		double b = r.nextGaussian();
+    		
+    		int c = 0;
+    		boolean placed = false;
+    		while (c < numBuckets || !placed) {
+    			double lRange = c*bucketSize + min;
+    			double rRange = lRange + bucketSize;
+    			if(b > lRange && b <= rRange) {
+    				counts[c]++; 
+    				placed = true;
+    			}
+    			c++;
+    		}
+    		total += b;
+    	}
+    	
+    	System.out.println("Avg: " + total / iterations);
+    	for(Integer i : counts) {
+    		System.out.println(i);
+    	}
 	}
 
 }

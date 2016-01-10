@@ -166,4 +166,11 @@ public class Vector2d {
 	public void decelerate(double accelerationConstant) {
 		this.setMagnitude(this.getMagnitude() * (1.0 - accelerationConstant));
 	}
+	
+	public Vector2d add(Vector2d other) {
+		Vector2d output = new Vector2d(0, 0);
+		output.setX(other.getX() + this.getX());
+		output.setY(other.getY() + this.getY());
+		return output;
+	}
 }

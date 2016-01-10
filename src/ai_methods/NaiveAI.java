@@ -13,12 +13,20 @@ public class NaiveAI implements AI{
 		for(int a = 0; a < s.numSensors; a++) {
 			if(s.sensorAdjustedValues[a] > 0 && s.sensorOutput[a] < minSensorValue) {
 				minSensorIndex = a;
-				minSensorValue = s.sensorAdjustedValues[a];
+				minSensorValue = s.sensorOutput[a];
 			}
 		}
 		
 		if(minSensorIndex >= 0) {
 			// Find ideal sensor angle, and then create vector to travel in
+			int lean = 0;
+			for(int a = 0; a < s.numSensors; a++) {
+				System.out.print(s.sensorOutput[a] + ", ");
+			}
+			System.out.println("\nAnd: " + minSensorValue);
+			if(minSensorIndex != 0 && minSensorIndex != s.numSensors) {
+				
+			}
 			Vector2d proposedVelocity = new Vector2d(s.maxMagnitude, s.sensorAngles[minSensorIndex]);
 			return new Action(proposedVelocity);
 		}
